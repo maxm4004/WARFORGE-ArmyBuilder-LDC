@@ -1,0 +1,5 @@
+node_modules
+dist
+pocketBase/pb_data
+pocketBase/pocketbase
+pocketBase/pocketbase.exe

@@ -12,8 +12,8 @@ function Modulo({ tabella, record, dati, onSalva, onAnnulla }) {
   function cambia(campo, valore) {
     setValori((v) => {
       const nuovi = { ...v, [campo]: valore }
-      // Cambiando il reparto, il tipo scelto prima non e' piu' valido.
-      tabella.campi.filter((c) => c.dipendeDa === campo).forEach((c) => { nuovi[c.nome] = '' })
+      // Cambiando un campo, le scelte che dipendono da esso non sono piu' valide.
+      tabella.campi.filter((c) => c.dipendeDa?.includes(campo)).forEach((c) => { nuovi[c.nome] = '' })
       return nuovi
     })
   }
@@ -32,7 +32,7 @@ function Modulo({ tabella, record, dati, onSalva, onAnnulla }) {
             <select value={valori[c.nome]} required={c.obbligatorio} onChange={(e) => cambia(c.nome, e.target.value)}>
               <option value="">—</option>
               {(dati[c.tabella] ?? [])
-                .filter((r) => !c.dipendeDa || r[c.dipendeDa] === valori[c.dipendeDa])
+                .filter((r) => (c.dipendeDa ?? []).every((d) => r[d] === valori[d]))
                 .map((r) => <option key={r.id} value={r.id}>{etichetta(r)}</option>)}
             </select>
           ) : (

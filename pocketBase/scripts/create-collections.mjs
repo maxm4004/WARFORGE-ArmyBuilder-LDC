@@ -19,7 +19,7 @@ const COLLECTIONS = [
   { name: "reparto", fields: [testo("nome"), testo("note", false)] },
   { name: "tipo_reparto", fields: [rel("id_reparto", "reparto"), testo("tipo")] },
   { name: "tipo_model", fields: [testo("nome")] },
-  { name: "texture", fields: [testo("url"), testo("nome"), testo("note", false)] },
+  { name: "texture", fields: [testo("url"), testo("nome"), testo("note", false), rel("id_esercito", "esercito"), rel("id_reparto", "reparto")] },
   { name: "collider", fields: [testo("url"), testo("nome"), testo("note", false)] },
   { name: "offset", fields: xyz },
   { name: "scale", fields: xyz },
