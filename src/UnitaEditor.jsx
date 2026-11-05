@@ -36,6 +36,9 @@ export default function UnitaEditor({ record, dati, onSalvata, onErrore, onAvvis
   const bpu = (dati.bpu ?? []).find((b) => b.id === valori.id_bpu)
   const fpb = (dati.fpb ?? []).find((f) => f.id === bpu?.id_fpb)
   const nSlot = fpb?.figure ?? 0
+  const numeriSlot = Array.from({ length: nSlot }, (_, i) => i + 1)
+  const meta = Math.ceil(nSlot / 2)
+  const righeSlot = [numeriSlot.slice(0, meta), numeriSlot.slice(meta)].filter((riga) => riga.length > 0)
   const figure = (dati.figura ?? []).filter((f) =>
     f.id_esercito === valori.id_esercito && f.id_reparto === fpb?.id_reparto && f.id_tipo_reparto === fpb?.id_tipo_reparto)
 
@@ -98,15 +101,19 @@ export default function UnitaEditor({ record, dati, onSalvata, onErrore, onAvvis
             <label>Numero basi *
               <input type="number" min="1" max={bpu.basi} required value={g.numero_basi} onChange={(e) => cambiaGruppo(i, { numero_basi: e.target.value })} />
             </label>
-            {Array.from({ length: nSlot }, (_, s) => s + 1).map((n) => (
-              <label key={n}>Slot {n} *
-                <select value={g.slot[n] ?? ''} required onChange={(e) => cambiaGruppo(i, { slot: { ...g.slot, [n]: e.target.value } })}>
-                  <option value="">—</option>
-                  {figure.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
-                </select>
-              </label>
-            ))}
           </div>
+          {righeSlot.map((riga) => (
+            <div className="modulo" key={riga[0]}>
+              {riga.map((n) => (
+                <label key={n}>Slot {n} *
+                  <select value={g.slot[n] ?? ''} required onChange={(e) => cambiaGruppo(i, { slot: { ...g.slot, [n]: e.target.value } })}>
+                    <option value="">—</option>
+                    {figure.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
+                  </select>
+                </label>
+              ))}
+            </div>
+          ))}
           {gruppi.length > 1 && <div className="azioni"><button type="button" onClick={() => setGruppi((x) => x.filter((_, j) => j !== i))}>Togli gruppo</button></div>}
         </section>
       ))}
