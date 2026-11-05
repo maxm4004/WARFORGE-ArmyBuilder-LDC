@@ -55,6 +55,7 @@ export default function App() {
   const [avviso, setAvviso] = useState('')
   const tabella = TABELLE.find((t) => t.id === tabId)
   const righe = dati[tabId] ?? []
+  const colonne = tabella.campi.filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
 
   useEffect(() => {
     Promise.all(TABELLE.map((t) => leggiTutti(t.id).then((r) => [t.id, r])))
@@ -122,7 +123,7 @@ export default function App() {
         <div className="scorri">
           <table>
             <thead>
-              <tr><th />{tabella.campi.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
+              <tr><th />{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
             </thead>
             <tbody>
               {righe.map((r) => (
@@ -131,7 +132,7 @@ export default function App() {
                     <button onClick={() => setModifica(r)}>Modifica</button>
                     <button onClick={() => rimuovi(r)}>Elimina</button>
                   </td>
-                  {tabella.campi.map((c) => <td key={c.nome}>{cella(c, r)}</td>)}
+                  {colonne.map((c) => <td key={c.nome}>{cella(c, r)}</td>)}
                 </tr>
               ))}
             </tbody>

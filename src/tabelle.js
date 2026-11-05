@@ -17,6 +17,7 @@ export const TABELLE = [
   {
     id: 'unita',
     titolo: 'Unità',
+    elenco: ['nome', 'id_esercito', 'id_reparto', 'id_tipo_reparto'],
     campi: [
       testo('nome', 'Nome'),
       rel('id_esercito', 'Esercito', 'esercito'),
