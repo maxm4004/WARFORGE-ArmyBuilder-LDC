@@ -4,10 +4,11 @@ import { etichetta } from './tabelle.js'
 
 const nuovoGruppo = () => ({ id: null, tipo_base: 'Standard', numero_basi: '', slot: {} })
 
-function gruppiIniziali(record, dati) {
-  if (!record) return [nuovoGruppo()]
-  const gruppi = (dati.unita_base ?? []).filter((b) => b.id_unita === record.id).map((b) => ({
-    id: b.id,
+function gruppiIniziali(record, copia, dati) {
+  const origine = record ?? copia
+  if (!origine) return [nuovoGruppo()]
+  const gruppi = (dati.unita_base ?? []).filter((b) => b.id_unita === origine.id).map((b) => ({
+    id: record ? b.id : null,
     tipo_base: b.tipo_base,
     numero_basi: b.numero_basi,
     slot: Object.fromEntries((dati.unita_slot ?? []).filter((s) => s.id_unita_base === b.id).map((s) => [s.numero_slot, s.id_figura])),
@@ -29,9 +30,14 @@ async function salvaGruppo(unitaId, gruppo, nSlot, dati) {
   for (const slot of esistenti.filter((s) => s.numero_slot > nSlot)) await elimina('unita_slot', slot.id)
 }
 
-export default function UnitaEditor({ record, dati, onSalvata, onErrore, onAvviso, onAnnulla }) {
-  const [valori, setValori] = useState({ nome: record?.nome ?? '', id_esercito: record?.id_esercito ?? '', id_bpu: record?.id_bpu ?? '' })
-  const [gruppi, setGruppi] = useState(() => gruppiIniziali(record, dati))
+export default function UnitaEditor({ record, copia, dati, onSalvata, onErrore, onAvviso, onAnnulla }) {
+  const origine = record ?? copia
+  const [valori, setValori] = useState({
+    nome: copia ? `${copia.nome} (copia)` : record?.nome ?? '',
+    id_esercito: origine?.id_esercito ?? '',
+    id_bpu: origine?.id_bpu ?? '',
+  })
+  const [gruppi, setGruppi] = useState(() => gruppiIniziali(record, copia, dati))
 
   const bpu = (dati.bpu ?? []).find((b) => b.id === valori.id_bpu)
   const fpb = (dati.fpb ?? []).find((f) => f.id === bpu?.id_fpb)
@@ -121,7 +127,7 @@ export default function UnitaEditor({ record, dati, onSalvata, onErrore, onAvvis
       <div className="azioni">
         {bpu && valori.id_esercito && <button type="button" onClick={() => setGruppi((g) => [...g, nuovoGruppo()])}>Aggiungi gruppo</button>}
         <button type="submit" disabled={!bpu}>{record ? 'Salva' : 'Aggiungi'}</button>
-        {record && <button type="button" onClick={onAnnulla}>Annulla</button>}
+        {origine && <button type="button" onClick={onAnnulla}>Annulla</button>}
         {bpu && <span>Basi: {totale} / {bpu.basi}</span>}
       </div>
     </form>

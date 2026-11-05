@@ -58,6 +58,7 @@ export default function App() {
   const [tabId, setTabId] = useState(TABELLE[0].id)
   const [dati, setDati] = useState({})
   const [modifica, setModifica] = useState(null)
+  const [copia, setCopia] = useState(null)
   const [avviso, setAvviso] = useState('')
   const tabella = TABELLE.find((t) => t.id === tabId)
   const righe = dati[tabId] ?? []
@@ -74,6 +75,7 @@ export default function App() {
   function apri(id) {
     setTabId(id)
     setModifica(null)
+    setCopia(null)
     setAvviso('')
   }
 
@@ -105,6 +107,7 @@ export default function App() {
       if (tabId === 'unita') await carica()
       else setDati((d) => ({ ...d, [tabId]: d[tabId].filter((r) => r.id !== record.id) }))
       if (modifica?.id === record.id) setModifica(null)
+      if (copia?.id === record.id) setCopia(null)
       setAvviso('')
     } catch (err) {
       setAvviso(err.message)
@@ -130,13 +133,14 @@ export default function App() {
         {avviso && <p className="avviso" role="alert">{avviso}</p>}
         {tabId === 'unita' ? (
           <UnitaEditor
-            key={modifica?.id ?? 'nuovo'}
+            key={modifica?.id ?? (copia ? `copia-${copia.id}` : 'nuovo')}
             record={modifica}
+            copia={copia}
             dati={dati}
-            onSalvata={async () => { await carica(); setModifica(null); setAvviso('') }}
+            onSalvata={async () => { await carica(); setModifica(null); setCopia(null); setAvviso('') }}
             onErrore={(msg) => { setAvviso(msg); carica() }}
             onAvviso={setAvviso}
-            onAnnulla={() => setModifica(null)}
+            onAnnulla={() => { setModifica(null); setCopia(null) }}
           />
         ) : (
           <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
@@ -150,7 +154,8 @@ export default function App() {
               {righe.map((r) => (
                 <tr key={r.id} className={modifica?.id === r.id ? 'selezionata' : ''}>
                   <td className="azioni">
-                    <button onClick={() => setModifica(r)}>Modifica</button>
+                    <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>
+                    {tabId === 'unita' && <button onClick={() => { setModifica(null); setCopia(r) }}>Copia</button>}
                     <button onClick={() => rimuovi(r)}>Elimina</button>
                   </td>
                   {colonne.map((c) => <td key={c.nome}>{cella(c, r)}</td>)}
