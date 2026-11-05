@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { aggiorna, contaUsi, crea, elimina, leggiTutti } from './api.js'
 import { TABELLE, etichetta, riferimentiA } from './tabelle.js'
+import UnitaEditor from './UnitaEditor.jsx'
 
 function valoriIniziali(tabella, record) {
   return Object.fromEntries(tabella.campi.map((c) => [c.nome, record?.[c.nome] ?? (c.tipo === 'number' ? 0 : '')]))
@@ -20,7 +21,7 @@ function Modulo({ tabella, record, dati, onSalva, onAnnulla }) {
 
   function invia(e) {
     e.preventDefault()
-    onSalva(Object.fromEntries(tabella.campi.map((c) => [c.nome, c.tipo === 'number' ? Number(valori[c.nome]) : valori[c.nome]])))
+    onSalva(Object.fromEntries(tabella.campi.map((c) => [c.nome, c.tipo === 'number' || c.numerico ? Number(valori[c.nome]) : valori[c.nome]])))
   }
 
   return (
@@ -33,7 +34,12 @@ function Modulo({ tabella, record, dati, onSalva, onAnnulla }) {
               <option value="">—</option>
               {(dati[c.tabella] ?? [])
                 .filter((r) => (c.dipendeDa ?? []).every((d) => r[d] === valori[d]))
-                .map((r) => <option key={r.id} value={r.id}>{etichetta(r)}</option>)}
+                .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
+            </select>
+          ) : c.tipo === 'scelta' ? (
+            <select value={valori[c.nome]} required={c.obbligatorio} onChange={(e) => cambia(c.nome, e.target.value)}>
+              <option value="">—</option>
+              {c.opzioni.map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
           ) : (
             <input type={c.tipo} step="any" value={valori[c.nome]} required={c.obbligatorio || c.tipo === 'number'} onChange={(e) => cambia(c.nome, e.target.value)} />
@@ -57,11 +63,13 @@ export default function App() {
   const righe = dati[tabId] ?? []
   const colonne = tabella.campi.filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
 
-  useEffect(() => {
-    Promise.all(TABELLE.map((t) => leggiTutti(t.id).then((r) => [t.id, r])))
+  function carica() {
+    return Promise.all(TABELLE.map((t) => leggiTutti(t.id).then((r) => [t.id, r])))
       .then((coppie) => setDati(Object.fromEntries(coppie)))
       .catch((err) => setAvviso(`PocketBase non raggiungibile: ${err.message}`))
-  }, [])
+  }
+
+  useEffect(() => { carica() }, [])
 
   function apri(id) {
     setTabId(id)
@@ -92,9 +100,10 @@ export default function App() {
           return
         }
       }
-      if (!window.confirm(`Eliminare "${etichetta(record)}"?`)) return
+      if (!window.confirm(`Eliminare "${etichetta(record, dati)}"?`)) return
       await elimina(tabId, record.id)
-      setDati((d) => ({ ...d, [tabId]: d[tabId].filter((r) => r.id !== record.id) }))
+      if (tabId === 'unita') await carica()
+      else setDati((d) => ({ ...d, [tabId]: d[tabId].filter((r) => r.id !== record.id) }))
       if (modifica?.id === record.id) setModifica(null)
       setAvviso('')
     } catch (err) {
@@ -104,7 +113,7 @@ export default function App() {
 
   function cella(campo, record) {
     if (campo.tipo !== 'rel') return String(record[campo.nome] ?? '')
-    return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === record[campo.nome]))
+    return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === record[campo.nome]), dati)
   }
 
   return (
@@ -112,14 +121,26 @@ export default function App() {
       <header>
         <h1>ArmyBuilder-LDC · Censimento</h1>
         <nav>
-          {TABELLE.map((t) => (
+          {TABELLE.filter((t) => !t.nascosta).map((t) => (
             <button key={t.id} className={t.id === tabId ? 'attivo' : ''} onClick={() => apri(t.id)}>{t.titolo}</button>
           ))}
         </nav>
       </header>
       <main>
         {avviso && <p className="avviso" role="alert">{avviso}</p>}
-        <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
+        {tabId === 'unita' ? (
+          <UnitaEditor
+            key={modifica?.id ?? 'nuovo'}
+            record={modifica}
+            dati={dati}
+            onSalvata={async () => { await carica(); setModifica(null); setAvviso('') }}
+            onErrore={(msg) => { setAvviso(msg); carica() }}
+            onAvviso={setAvviso}
+            onAnnulla={() => setModifica(null)}
+          />
+        ) : (
+          <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
+        )}
         <div className="scorri">
           <table>
             <thead>

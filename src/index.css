@@ -16,3 +16,6 @@ table { border-collapse: collapse; width: 100%; }
 th, td { border-bottom: 1px solid var(--bordo); padding: 6px 8px; text-align: left; white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
 .selezionata { outline: 2px solid var(--accento); outline-offset: -2px; }
 .avviso { margin: 0; padding: 8px 10px; border: 1px solid #c33; color: #c33; }
+.gruppo { border: 1px solid var(--bordo); padding: 10px; display: grid; gap: 10px; }
+.gruppo h2 { margin: 0; font-size: 14px; }
+.editor-unita { display: grid; gap: 12px; }

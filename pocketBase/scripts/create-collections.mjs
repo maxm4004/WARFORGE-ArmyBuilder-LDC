@@ -8,7 +8,9 @@ const APPLY = process.argv.includes("--apply");
 const { PB_EMAIL, PB_PASSWORD } = process.env;
 
 const testo = (name, required = true) => ({ name, type: "text", required });
-const rel = (name, collection, required = true) => ({ name, type: "relation", collection, required });
+const rel = (name, collection, required = true, cascadeDelete = false) => ({ name, type: "relation", collection, required, cascadeDelete });
+const scelta = (name, values) => ({ name, type: "select", values, maxSelect: 1, required: true });
+const intero = (name) => ({ name, type: "number", onlyInt: true, required: true });
 // I numeri non sono obbligatori: per PocketBase 0 conta come valore vuoto.
 const numero = (name) => ({ name, type: "number", required: false });
 const xyz = [testo("nome"), numero("valoreX"), numero("valoreY"), numero("valoreZ")];
@@ -25,7 +27,7 @@ const COLLECTIONS = [
   { name: "scale", fields: xyz },
   { name: "rotation", fields: xyz },
   {
-    name: "unita",
+    name: "figura",
     fields: [
       testo("nome"),
       rel("id_esercito", "esercito"),
@@ -35,16 +37,33 @@ const COLLECTIONS = [
       testo("urlmesh"),
       rel("id_texture", "texture", false),
       rel("id_collider", "collider", false),
-      rel("id_offset", "offset"),
-      rel("id_scale", "scale"),
-      rel("id_rotation", "rotation"),
     ],
+  },
+  {
+    name: "fpb",
+    fields: [rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto"), intero("figure"), scelta("misura", ["4x3", "4x5"])],
+  },
+  {
+    name: "fpb_slot",
+    fields: [rel("id_fpb", "fpb", true, true), intero("numero_slot"), rel("id_offset", "offset"), rel("id_scale", "scale"), rel("id_rotation", "rotation")],
+    indexes: ["CREATE UNIQUE INDEX idx_fpb_slot ON fpb_slot (id_fpb, numero_slot)"],
+  },
+  { name: "bpu", fields: [rel("id_fpb", "fpb"), intero("basi")] },
+  { name: "unita", fields: [testo("nome"), rel("id_esercito", "esercito"), rel("id_bpu", "bpu")] },
+  {
+    name: "unita_base",
+    fields: [rel("id_unita", "unita", true, true), scelta("tipo_base", ["Comando", "Standard"]), intero("numero_basi")],
+  },
+  {
+    name: "unita_slot",
+    fields: [rel("id_unita_base", "unita_base", true, true), intero("numero_slot"), rel("id_figura", "figura")],
+    indexes: ["CREATE UNIQUE INDEX idx_unita_slot ON unita_slot (id_unita_base, numero_slot)"],
   },
 ];
 
 const BASE = {
   esercito: ["Francese", "Inglese", "Austriaco", "Russo", "Prussiano"].map((nome) => ({ nome })),
-  reparto: ["Fanteria", "Cavalleria", "Artiglieria"].map((nome) => ({ nome })),
+  reparto: ["Fanteria", "Cavalleria", "Artiglieria", "Comando"].map((nome) => ({ nome })),
   tipo_model: ["custom-model", "asset-bundle"].map((nome) => ({ nome })),
 };
 const TIPI = {
@@ -76,10 +95,10 @@ async function creaCollection(def, esistenti) {
   console.log(`+ ${def.name}`);
   if (!APPLY) return;
   const fields = def.fields.map(({ collection, ...f }) =>
-    collection ? { ...f, collectionId: esistenti.get(collection), maxSelect: 1, cascadeDelete: false } : f
+    collection ? { ...f, collectionId: esistenti.get(collection), maxSelect: 1 } : f
   );
   const creata = await post("/api/collections", {
-    name: def.name, type: "base", fields,
+    name: def.name, type: "base", fields, indexes: def.indexes ?? [],
     listRule: "", viewRule: "", createRule: "", updateRule: "", deleteRule: "",
   });
   esistenti.set(def.name, creata.id);
