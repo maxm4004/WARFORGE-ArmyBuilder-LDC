@@ -21,7 +21,7 @@ const COLLECTIONS = [
   { name: "tipo_model", fields: [testo("nome")] },
   { name: "texture", fields: [testo("url"), testo("nome"), testo("note", false), rel("id_esercito", "esercito"), rel("id_reparto", "reparto")] },
   { name: "collider", fields: [testo("url"), testo("nome"), testo("note", false)] },
-  { name: "offset", fields: xyz },
+  { name: "offset", fields: [...xyz, rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto")] },
   { name: "scale", fields: xyz },
   { name: "rotation", fields: xyz },
   {

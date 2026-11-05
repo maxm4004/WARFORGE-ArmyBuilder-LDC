@@ -11,7 +11,7 @@ export const TABELLE = [
   { id: 'tipo_model', titolo: 'Tipo model', campi: [testo('nome', 'Nome')] },
   { id: 'texture', titolo: 'Texture', campi: [testo('nome', 'Nome'), rel('id_esercito', 'Esercito', 'esercito'), rel('id_reparto', 'Reparto', 'reparto'), testo('url', 'URL'), testo('note', 'Note', false)] },
   { id: 'collider', titolo: 'Collider', campi: [testo('nome', 'Nome'), testo('url', 'URL'), testo('note', 'Note', false)] },
-  { id: 'offset', titolo: 'Offset', campi: xyz },
+  { id: 'offset', titolo: 'Offset', campi: [testo('nome', 'Nome'), rel('id_reparto', 'Reparto', 'reparto'), rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }), ...xyz.slice(1)] },
   { id: 'scale', titolo: 'Scale', campi: xyz },
   { id: 'rotation', titolo: 'Rotation', campi: xyz },
   {
