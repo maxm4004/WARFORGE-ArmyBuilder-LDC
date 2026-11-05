@@ -1,0 +1,18 @@
+:root { color-scheme: light dark; --bordo: #8886; --accento: #2f6fb3; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.4 system-ui, sans-serif; }
+header { padding: 12px 16px; border-bottom: 1px solid var(--bordo); }
+h1 { margin: 0 0 10px; font-size: 18px; }
+nav { display: flex; flex-wrap: wrap; gap: 4px; }
+main { padding: 16px; display: grid; gap: 16px; }
+button { font: inherit; padding: 4px 10px; cursor: pointer; }
+nav .attivo { background: var(--accento); border-color: var(--accento); color: #fff; }
+.modulo { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; align-items: end; }
+.modulo label { display: grid; gap: 3px; min-width: 0; }
+input, select { font: inherit; padding: 5px; width: 100%; }
+.azioni { display: flex; gap: 4px; }
+.scorri { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border-bottom: 1px solid var(--bordo); padding: 6px 8px; text-align: left; white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.selezionata { outline: 2px solid var(--accento); outline-offset: -2px; }
+.avviso { margin: 0; padding: 8px 10px; border: 1px solid #c33; color: #c33; }
