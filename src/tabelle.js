@@ -5,6 +5,11 @@ const scelta = (nome, label, opzioni, extra = {}) => ({ nome, label, tipo: 'scel
 
 const SLOT = [1, 2, 3, 4, 5, 6]
 
+// Valori del regolamento LDC: morale delle unita' (3.3) e valore dei Generali (7.1).
+export const MORALE = ['Marmaglia', 'Coscritti', 'Regolari', 'Veterani', 'Elite'].map((label, i) => ({ valore: i + 1, label: `${i + 1} - ${label}` }))
+export const VALORE_GENERALE = ['Imbecille', 'Incompetente', 'Affidabile', 'Abile', 'Geniale'].map((label, i) => ({ valore: i + 1, label: `${i + 1} - ${label}` }))
+export const ARMI = ['Moschetto', 'Moschetto rigato', 'Sciabola', 'Lancia', 'Artiglieria leggera', 'Artiglieria media', 'Artiglieria pesante']
+
 const xyz = [testo('nome', 'Nome'), numero('valoreX', 'X'), numero('valoreY', 'Y'), numero('valoreZ', 'Z')]
 
 export const TABELLE = [
@@ -75,6 +80,47 @@ export const TABELLE = [
     titolo: 'Unità',
     nascosta: true,
     campi: [rel('id_unita_base', 'Base', 'unita_base', { cascata: true }), numero('numero_slot', 'Slot'), rel('id_figura', 'Figura', 'figura')],
+  },
+  // Coalizioni: si gestiscono dalla pagina Coalizioni, non hanno un tab nel Censimento.
+  {
+    id: 'coalizione',
+    titolo: 'Coalizioni',
+    nascosta: true,
+    campi: [testo('nome', 'Nome'), scelta('lato', 'Lato', ['Army1', 'Army2'])],
+  },
+  {
+    id: 'comando',
+    titolo: 'Coalizioni',
+    nascosta: true,
+    campi: [
+      rel('id_coalizione', 'Coalizione', 'coalizione', { cascata: true }),
+      testo('nome', 'Nome comando'),
+      testo('comandante', 'Comandante'),
+      scelta('valore', 'Valore', VALORE_GENERALE, { numerico: true }),
+    ],
+  },
+  {
+    id: 'brigata',
+    titolo: 'Coalizioni',
+    nascosta: true,
+    campi: [
+      rel('id_comando', 'Comando', 'comando', { cascata: true }),
+      testo('nome', 'Nome brigata'),
+      testo('generale', 'Generale', false),
+      scelta('valore', 'Valore', VALORE_GENERALE, { numerico: true, obbligatorio: false }),
+    ],
+  },
+  {
+    id: 'schierata',
+    titolo: 'Coalizioni',
+    nascosta: true,
+    campi: [
+      rel('id_brigata', 'Brigata', 'brigata', { cascata: true }),
+      testo('nome', 'Nome'),
+      rel('id_unita', 'Unità', 'unita'),
+      scelta('morale', 'Morale', MORALE, { numerico: true }),
+      scelta('arma', 'Arma', ARMI),
+    ],
   },
 ]
 

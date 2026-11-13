@@ -2,59 +2,11 @@ import { useEffect, useState } from 'react'
 import { aggiorna, contaUsi, crea, elimina, leggiTutti } from './api.js'
 import { TABELLE, etichetta, riferimentiA } from './tabelle.js'
 import UnitaEditor from './UnitaEditor.jsx'
-
-function valoriIniziali(tabella, record) {
-  return Object.fromEntries(tabella.campi.map((c) => [c.nome, record?.[c.nome] ?? (c.tipo === 'number' ? 0 : '')]))
-}
-
-function Modulo({ tabella, record, dati, onSalva, onAnnulla }) {
-  const [valori, setValori] = useState(() => valoriIniziali(tabella, record))
-
-  function cambia(campo, valore) {
-    setValori((v) => {
-      const nuovi = { ...v, [campo]: valore }
-      // Cambiando un campo, le scelte che dipendono da esso non sono piu' valide.
-      tabella.campi.filter((c) => c.dipendeDa?.includes(campo)).forEach((c) => { nuovi[c.nome] = '' })
-      return nuovi
-    })
-  }
-
-  function invia(e) {
-    e.preventDefault()
-    onSalva(Object.fromEntries(tabella.campi.map((c) => [c.nome, c.tipo === 'number' || c.numerico ? Number(valori[c.nome]) : valori[c.nome]])))
-  }
-
-  return (
-    <form className="modulo" onSubmit={invia}>
-      {tabella.campi.map((c) => (
-        <label key={c.nome}>
-          {c.label}{c.obbligatorio ? ' *' : ''}
-          {c.tipo === 'rel' ? (
-            <select value={valori[c.nome]} required={c.obbligatorio} onChange={(e) => cambia(c.nome, e.target.value)}>
-              <option value="">—</option>
-              {(dati[c.tabella] ?? [])
-                .filter((r) => (c.dipendeDa ?? []).every((d) => r[d] === valori[d]))
-                .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
-            </select>
-          ) : c.tipo === 'scelta' ? (
-            <select value={valori[c.nome]} required={c.obbligatorio} onChange={(e) => cambia(c.nome, e.target.value)}>
-              <option value="">—</option>
-              {c.opzioni.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          ) : (
-            <input type={c.tipo} step="any" value={valori[c.nome]} required={c.obbligatorio || c.tipo === 'number'} onChange={(e) => cambia(c.nome, e.target.value)} />
-          )}
-        </label>
-      ))}
-      <div className="azioni">
-        <button type="submit">{record ? 'Salva' : 'Aggiungi'}</button>
-        {record && <button type="button" onClick={onAnnulla}>Annulla</button>}
-      </div>
-    </form>
-  )
-}
+import Modulo from './Modulo.jsx'
+import CoalizioniPage from './CoalizioniPage.jsx'
 
 export default function App() {
+  const [sezione, setSezione] = useState('censimento')
   const [tabId, setTabId] = useState(TABELLE[0].id)
   const [dati, setDati] = useState({})
   const [modifica, setModifica] = useState(null)
@@ -122,16 +74,23 @@ export default function App() {
   return (
     <>
       <header>
-        <h1>ArmyBuilder-LDC · Censimento</h1>
-        <nav>
+        <h1>ArmyBuilder-LDC</h1>
+        <nav className="sezioni">
+          {[['censimento', 'Censimento'], ['coalizioni', 'Coalizioni']].map(([id, titolo]) => (
+            <button key={id} className={id === sezione ? 'attivo' : ''} onClick={() => { setSezione(id); setAvviso('') }}>{titolo}</button>
+          ))}
+        </nav>
+        {sezione === 'censimento' && <nav>
           {TABELLE.filter((t) => !t.nascosta).map((t) => (
             <button key={t.id} className={t.id === tabId ? 'attivo' : ''} onClick={() => apri(t.id)}>{t.titolo}</button>
           ))}
-        </nav>
+        </nav>}
       </header>
       <main>
         {avviso && <p className="avviso" role="alert">{avviso}</p>}
-        {tabId === 'unita' ? (
+        {sezione === 'coalizioni' ? (
+          <CoalizioniPage dati={dati} carica={carica} onAvviso={setAvviso} />
+        ) : tabId === 'unita' ? (
           <UnitaEditor
             key={modifica?.id ?? (copia ? `copia-${copia.id}` : 'nuovo')}
             record={modifica}
@@ -145,7 +104,7 @@ export default function App() {
         ) : (
           <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
         )}
-        <div className="scorri">
+        {sezione === 'censimento' && <div className="scorri">
           <table>
             <thead>
               <tr><th />{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
@@ -163,7 +122,7 @@ export default function App() {
               ))}
             </tbody>
           </table>
-        </div>
+        </div>}
       </main>
     </>
   )

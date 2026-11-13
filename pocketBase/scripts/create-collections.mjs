@@ -11,6 +11,7 @@ const testo = (name, required = true) => ({ name, type: "text", required });
 const rel = (name, collection, required = true, cascadeDelete = false) => ({ name, type: "relation", collection, required, cascadeDelete });
 const scelta = (name, values) => ({ name, type: "select", values, maxSelect: 1, required: true });
 const intero = (name) => ({ name, type: "number", onlyInt: true, required: true });
+const da1a5 = (name, required = true) => ({ name, type: "number", onlyInt: true, min: 1, max: 5, required });
 // I numeri non sono obbligatori: per PocketBase 0 conta come valore vuoto.
 const numero = (name) => ({ name, type: "number", required: false });
 const xyz = [testo("nome"), numero("valoreX"), numero("valoreY"), numero("valoreZ")];
@@ -58,6 +59,19 @@ const COLLECTIONS = [
     name: "unita_slot",
     fields: [rel("id_unita_base", "unita_base", true, true), intero("numero_slot"), rel("id_figura", "figura")],
     indexes: ["CREATE UNIQUE INDEX idx_unita_slot ON unita_slot (id_unita_base, numero_slot)"],
+  },
+  { name: "coalizione", fields: [testo("nome"), scelta("lato", ["Army1", "Army2"])] },
+  { name: "comando", fields: [rel("id_coalizione", "coalizione", true, true), testo("nome"), testo("comandante"), da1a5("valore")] },
+  { name: "brigata", fields: [rel("id_comando", "comando", true, true), testo("nome"), testo("generale", false), da1a5("valore", false)] },
+  {
+    name: "schierata",
+    fields: [
+      rel("id_brigata", "brigata", true, true),
+      testo("nome"),
+      rel("id_unita", "unita"),
+      da1a5("morale"),
+      scelta("arma", ["Moschetto", "Moschetto rigato", "Sciabola", "Lancia", "Artiglieria leggera", "Artiglieria media", "Artiglieria pesante"]),
+    ],
   },
 ];
 

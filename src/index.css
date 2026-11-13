@@ -19,3 +19,12 @@ th, td { border-bottom: 1px solid var(--bordo); padding: 6px 8px; text-align: le
 .gruppo { border: 1px solid var(--bordo); padding: 10px; display: grid; gap: 10px; }
 .gruppo h2 { margin: 0; font-size: 14px; }
 .editor-unita { display: grid; gap: 12px; }
+.sezioni { margin-bottom: 8px; }
+.albero { display: grid; gap: 10px; }
+.nodo { display: grid; gap: 6px; }
+.nodo-coalizione { border: 1px solid var(--bordo); padding: 10px; }
+.figli { display: grid; gap: 6px; padding-left: 16px; border-left: 2px solid var(--bordo); }
+.riga { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.nodo-coalizione > .riga .nome { font-size: 16px; }
+.info { opacity: 0.7; }
+.nuovo { display: grid; gap: 6px; padding: 8px; border: 1px dashed var(--bordo); }
