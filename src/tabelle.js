@@ -26,6 +26,7 @@ export const TABELLE = [
     id: 'figura',
     titolo: 'Figura',
     elenco: ['nome', 'id_esercito', 'id_reparto', 'id_tipo_reparto'],
+    filtri: ['id_esercito', 'id_reparto'],
     campi: [
       testo('nome', 'Nome'),
       rel('id_esercito', 'Esercito', 'esercito'),

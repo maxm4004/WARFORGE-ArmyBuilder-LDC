@@ -28,3 +28,5 @@ th, td { border-bottom: 1px solid var(--bordo); padding: 6px 8px; text-align: le
 .nodo-coalizione > .riga .nome { font-size: 16px; }
 .info { opacity: 0.7; }
 .nuovo { display: grid; gap: 6px; padding: 8px; border: 1px dashed var(--bordo); }
+.filtri { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--bordo); }
+.filtri label { display: grid; gap: 3px; }

@@ -12,8 +12,10 @@ export default function App() {
   const [modifica, setModifica] = useState(null)
   const [copia, setCopia] = useState(null)
   const [avviso, setAvviso] = useState('')
+  const [filtri, setFiltri] = useState({})
   const tabella = TABELLE.find((t) => t.id === tabId)
-  const righe = dati[tabId] ?? []
+  const campiFiltro = (tabella.filtri ?? []).map((nome) => tabella.campi.find((c) => c.nome === nome))
+  const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || r[c.nome] === filtri[c.nome]))
   const colonne = tabella.campi.filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
 
   function carica() {
@@ -28,6 +30,7 @@ export default function App() {
     setTabId(id)
     setModifica(null)
     setCopia(null)
+    setFiltri({})
     setAvviso('')
   }
 
@@ -87,6 +90,18 @@ export default function App() {
         </nav>}
       </header>
       <main>
+        {sezione === 'censimento' && campiFiltro.length > 0 && (
+          <div className="filtri">
+            {campiFiltro.map((c) => (
+              <label key={c.nome}>Filtra per {c.label.toLowerCase()}
+                <select value={filtri[c.nome] ?? ''} onChange={(e) => setFiltri((f) => ({ ...f, [c.nome]: e.target.value }))}>
+                  <option value="">Tutti</option>
+                  {(dati[c.tabella] ?? []).map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
+                </select>
+              </label>
+            ))}
+          </div>
+        )}
         {avviso && <p className="avviso" role="alert">{avviso}</p>}
         {sezione === 'coalizioni' ? (
           <CoalizioniPage dati={dati} carica={carica} onAvviso={setAvviso} />
