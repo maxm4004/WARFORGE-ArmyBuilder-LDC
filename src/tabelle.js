@@ -19,7 +19,7 @@ export const TABELLE = [
   { id: 'tipo_model', titolo: 'Tipo model', campi: [testo('nome', 'Nome')] },
   { id: 'texture', titolo: 'Texture', filtri: ['id_esercito', 'id_reparto'], campi: [testo('nome', 'Nome'), rel('id_esercito', 'Esercito', 'esercito'), rel('id_reparto', 'Reparto', 'reparto'), testo('url', 'URL'), testo('note', 'Note', false)] },
   { id: 'collider', titolo: 'Collider', campi: [testo('nome', 'Nome'), testo('url', 'URL'), testo('note', 'Note', false)] },
-  { id: 'offset', titolo: 'Offset', campi: [testo('nome', 'Nome'), rel('id_reparto', 'Reparto', 'reparto'), rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }), ...xyz.slice(1)] },
+  { id: 'offset', titolo: 'Offset', filtri: ['id_reparto', 'id_tipo_reparto'], campi: [testo('nome', 'Nome'), rel('id_reparto', 'Reparto', 'reparto'), rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }), ...xyz.slice(1)] },
   { id: 'scale', titolo: 'Scale', campi: xyz },
   { id: 'rotation', titolo: 'Rotation', campi: xyz },
   {
@@ -51,6 +51,7 @@ export const TABELLE = [
   {
     id: 'fpb_slot',
     titolo: 'Slot FPB',
+    filtri: ['id_fpb'],
     campi: [
       rel('id_fpb', 'FPB', 'fpb', { cascata: true }),
       scelta('numero_slot', 'Slot', SLOT, { numerico: true }),
@@ -62,11 +63,13 @@ export const TABELLE = [
   {
     id: 'bpu',
     titolo: 'BPU',
+    filtri: ['id_fpb'],
     campi: [rel('id_fpb', 'FPB', 'fpb'), scelta('basi', 'Basi per unità', [2, 3, 4, 6], { numerico: true })],
   },
   {
     id: 'unita',
     titolo: 'Unità',
+    filtri: ['id_esercito'],
     campi: [testo('nome', 'Nome'), rel('id_esercito', 'Esercito', 'esercito'), rel('id_bpu', 'BPU', 'bpu')],
   },
   // Composizione dell'unita': si gestisce dall'editor Unità, non ha un tab proprio.

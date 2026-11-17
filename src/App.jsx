@@ -26,6 +26,15 @@ export default function App() {
 
   useEffect(() => { carica() }, [])
 
+  // Cambiando un filtro, quelli che dipendono da esso (es. tipo reparto dal reparto) si azzerano.
+  function cambiaFiltro(campo, valore) {
+    setFiltri((f) => {
+      const nuovi = { ...f, [campo]: valore }
+      campiFiltro.filter((c) => c.dipendeDa?.includes(campo)).forEach((c) => { nuovi[c.nome] = '' })
+      return nuovi
+    })
+  }
+
   function apri(id) {
     setTabId(id)
     setModifica(null)
@@ -93,10 +102,12 @@ export default function App() {
         {sezione === 'censimento' && campiFiltro.length > 0 && (
           <div className="filtri">
             {campiFiltro.map((c) => (
-              <label key={c.nome}>Filtra per {c.label.toLowerCase()}
-                <select value={filtri[c.nome] ?? ''} onChange={(e) => setFiltri((f) => ({ ...f, [c.nome]: e.target.value }))}>
+              <label key={c.nome}>Filtra per {c.label}
+                <select value={filtri[c.nome] ?? ''} onChange={(e) => cambiaFiltro(c.nome, e.target.value)}>
                   <option value="">Tutti</option>
-                  {(dati[c.tabella] ?? []).map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
+                  {(dati[c.tabella] ?? [])
+                    .filter((r) => (c.dipendeDa ?? []).every((d) => !filtri[d] || r[d] === filtri[d]))
+                    .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
                 </select>
               </label>
             ))}
