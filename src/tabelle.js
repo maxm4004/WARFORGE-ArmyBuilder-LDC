@@ -64,7 +64,7 @@ export const TABELLE = [
     id: 'bpu',
     titolo: 'BPU',
     filtri: ['id_fpb'],
-    campi: [rel('id_fpb', 'FPB', 'fpb'), scelta('basi', 'Basi per unità', [2, 3, 4, 6], { numerico: true })],
+    campi: [rel('id_fpb', 'FPB', 'fpb'), scelta('basi', 'Basi per unità', [1, 2, 3, 4, 6], { numerico: true })],
   },
   {
     id: 'unita',
