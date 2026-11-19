@@ -135,7 +135,20 @@ export default function App() {
             onAnnulla={() => { setModifica(null); setCopia(null) }}
           />
         ) : (
-          !tabella.solaLettura && <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
+          tabella.soloModifica ? (
+            modifica && (
+              <Modulo
+                key={`${tabId}-${modifica.id}`}
+                tabella={{ ...tabella, campi: tabella.campi.filter((c) => tabella.soloModifica.includes(c.nome)) }}
+                record={modifica}
+                dati={dati}
+                onSalva={salva}
+                onAnnulla={() => setModifica(null)}
+              />
+            )
+          ) : (
+            <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
+          )
         )}
         {sezione === 'censimento' && <div className="scorri">
           <table>
@@ -146,7 +159,7 @@ export default function App() {
               {righe.map((r) => (
                 <tr key={r.id} className={modifica?.id === r.id ? 'selezionata' : ''}>
                   <td className="azioni">
-                    {!tabella.solaLettura && <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>}
+                    <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>
                     {tabId === 'unita' && <button onClick={() => { setModifica(null); setCopia(r) }}>Copia</button>}
                     <button onClick={() => rimuovi(r)}>Elimina</button>
                   </td>

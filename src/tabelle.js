@@ -22,15 +22,17 @@ export const TABELLE = [
   {
     id: 'dropbox_file',
     titolo: 'File Dropbox',
-    solaLettura: true,
-    elenco: ['nome', 'estensione', 'categoria', 'id_esercito', 'id_reparto', 'trovato', 'percorso'],
-    filtri: ['id_esercito', 'id_reparto'],
+    // I file li crea dropbox-import: a mano si correggono solo esercito, reparto e tipo reparto.
+    soloModifica: ['id_esercito', 'id_reparto', 'id_tipo_reparto'],
+    elenco: ['nome', 'estensione', 'categoria', 'id_esercito', 'id_reparto', 'id_tipo_reparto', 'trovato', 'percorso'],
+    filtri: ['id_esercito', 'id_reparto', 'id_tipo_reparto'],
     campi: [
       testo('nome', 'Nome'),
       testo('estensione', 'Estensione'),
       testo('categoria', 'Categoria'),
-      rel('id_esercito', 'Esercito', 'esercito'),
-      rel('id_reparto', 'Reparto', 'reparto'),
+      rel('id_esercito', 'Esercito', 'esercito', { obbligatorio: false }),
+      rel('id_reparto', 'Reparto', 'reparto', { obbligatorio: false }),
+      rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { obbligatorio: false, dipendeDa: ['id_reparto'] }),
       { nome: 'trovato', label: 'Su Dropbox', tipo: 'bool' },
       testo('percorso', 'Percorso'),
     ],

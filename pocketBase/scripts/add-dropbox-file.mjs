@@ -1,5 +1,6 @@
 // Crea la staging dropbox_file e collega Figura, Base, Texture e Collider ai suoi file.
 // - dropbox_file: un record per ogni file di Dropbox (lo riempie dropbox-import).
+// - dropbox_file.id_tipo_reparto: si compila a mano dalla scheda File Dropbox.
 // - esercito, reparto: campo cartella = nome della cartella su Dropbox (es. French, infantry).
 // - figura.id_mesh, base.id_mesh / id_diffuse / id_normal, texture.id_file, collider.id_file.
 // I vecchi campi URL restano con i loro valori ma non sono piu' obbligatori:
@@ -45,6 +46,7 @@ async function main() {
 
   // collection -> { campi nuovi, vecchi campi da rendere facoltativi }
   const MODIFICHE = {
+    dropbox_file: { nuovi: [relazione("id_tipo_reparto", id("tipo_reparto"))], facoltativi: [] },
     esercito: { nuovi: [testo("cartella")], facoltativi: [] },
     reparto: { nuovi: [testo("cartella")], facoltativi: [] },
     figura: { nuovi: [relazione("id_mesh", fileId)], facoltativi: ["urlmesh"] },
@@ -54,6 +56,7 @@ async function main() {
   };
 
   for (const [nome, { nuovi, facoltativi }] of Object.entries(MODIFICHE)) {
+    if (nome === "dropbox_file" && !fileId) continue; // prova: la collection non e' ancora stata creata
     const collection = await api(`/api/collections/${nome}`);
     const daAggiungere = nuovi.filter((f) => !collection.fields.some((c) => c.name === f.name));
     const daAllentare = collection.fields.filter((f) => facoltativi.includes(f.name) && f.required);

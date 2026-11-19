@@ -28,7 +28,7 @@ const COLLECTIONS = [
     fields: [
       testo("id_dropbox"), testo("percorso"), testo("nome"), testo("estensione", false), testo("categoria", false),
       testo("cartella_esercito", false), testo("cartella_reparto", false),
-      rel("id_esercito", "esercito", false), rel("id_reparto", "reparto", false),
+      rel("id_esercito", "esercito", false), rel("id_reparto", "reparto", false), rel("id_tipo_reparto", "tipo_reparto", false),
       testo("url", false), { name: "modificato", type: "date", required: false }, { name: "trovato", type: "bool", required: false },
     ],
     indexes: ["CREATE UNIQUE INDEX idx_dropbox_file_id ON dropbox_file (id_dropbox)"],

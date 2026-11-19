@@ -2,6 +2,7 @@
 // Il percorso .../{esercito}/{reparto}/{mesh|texture|collider}/... da' esercito, reparto e categoria;
 // esercito e reparto si abbinano tramite il campo cartella di Esercito e Reparto.
 // - file gia' importato (stesso id Dropbox): aggiornato; file nuovo: aggiunto;
+// - esercito e reparto gia' compilati (anche a mano) non vengono sovrascritti; il tipo reparto si compila solo a mano;
 // - file della cartella non piu' su Dropbox: segnato come non trovato (non viene cancellato);
 // - Figura, Base, Texture e Collider senza file collegato: collegati se il vecchio URL coincide con quello del file.
 // Prova:  node dropbox-import.mjs --cartella=/Armies/model            nessuna scrittura
@@ -70,11 +71,13 @@ async function main() {
       modificato: f.server_modified,
       trovato: true,
     };
+    const esistente = perId.get(f.id);
+    if (esistente?.id_esercito) record.id_esercito = esistente.id_esercito;
+    if (esistente?.id_reparto) record.id_reparto = esistente.id_reparto;
     if (!url) conta.senzaLink++;
     if (dati.cartella_esercito && !record.id_esercito) nonAbbinate.add(`esercito "${dati.cartella_esercito}"`);
     if (dati.cartella_reparto && !record.id_reparto) nonAbbinate.add(`reparto "${dati.cartella_reparto}"`);
 
-    const esistente = perId.get(f.id);
     if (!esistente) {
       conta.nuovi++;
       if (APPLY) staging.push(await crea("dropbox_file", record));
