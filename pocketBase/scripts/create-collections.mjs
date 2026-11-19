@@ -18,13 +18,30 @@ const xyz = [testo("nome"), numero("valoreX"), numero("valoreY"), numero("valore
 
 // L'ordine conta: ogni relation punta a una collection gia' creata.
 const COLLECTIONS = [
-  { name: "esercito", fields: [testo("nome"), testo("note", false)] },
-  { name: "reparto", fields: [testo("nome"), testo("note", false)] },
+  { name: "esercito", fields: [testo("nome"), testo("note", false), testo("cartella", false)] },
+  { name: "reparto", fields: [testo("nome"), testo("note", false), testo("cartella", false)] },
   { name: "tipo_reparto", fields: [rel("id_reparto", "reparto"), testo("tipo")] },
   { name: "tipo_model", fields: [testo("nome")] },
-  { name: "texture", fields: [testo("url"), testo("nome"), testo("note", false), rel("id_esercito", "esercito"), rel("id_reparto", "reparto")] },
-  { name: "collider", fields: [testo("url"), testo("nome"), testo("note", false)] },
-  { name: "base", fields: [testo("nome"), testo("urlmesh"), testo("diffuse"), testo("normal", false), rel("id_collider", "collider", false)] },
+  // Staging dei file di Dropbox: la riempie dropbox-import.
+  {
+    name: "dropbox_file",
+    fields: [
+      testo("id_dropbox"), testo("percorso"), testo("nome"), testo("estensione", false), testo("categoria", false),
+      testo("cartella_esercito", false), testo("cartella_reparto", false),
+      rel("id_esercito", "esercito", false), rel("id_reparto", "reparto", false),
+      testo("url", false), { name: "modificato", type: "date", required: false }, { name: "trovato", type: "bool", required: false },
+    ],
+    indexes: ["CREATE UNIQUE INDEX idx_dropbox_file_id ON dropbox_file (id_dropbox)"],
+  },
+  { name: "texture", fields: [testo("nome"), testo("note", false), rel("id_esercito", "esercito"), rel("id_reparto", "reparto"), rel("id_file", "dropbox_file", false)] },
+  { name: "collider", fields: [testo("nome"), testo("note", false), rel("id_file", "dropbox_file", false)] },
+  {
+    name: "base",
+    fields: [
+      testo("nome"), rel("id_mesh", "dropbox_file", false), rel("id_diffuse", "dropbox_file", false), rel("id_normal", "dropbox_file", false),
+      rel("id_collider", "collider", false),
+    ],
+  },
   { name: "offset", fields: [...xyz, rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto")] },
   { name: "scale", fields: xyz },
   { name: "rotation", fields: xyz },
@@ -36,7 +53,7 @@ const COLLECTIONS = [
       rel("id_reparto", "reparto"),
       rel("id_tipo_reparto", "tipo_reparto"),
       rel("id_tipo_model", "tipo_model"),
-      testo("urlmesh"),
+      rel("id_mesh", "dropbox_file", false),
       rel("id_texture", "texture", false),
       rel("id_collider", "collider", false),
     ],

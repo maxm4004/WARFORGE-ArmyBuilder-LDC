@@ -2,6 +2,8 @@ const testo = (nome, label, obbligatorio = true) => ({ nome, label, tipo: 'text'
 const numero = (nome, label) => ({ nome, label, tipo: 'number' })
 const rel = (nome, label, tabella, extra = {}) => ({ nome, label, tipo: 'rel', tabella, obbligatorio: true, ...extra })
 const scelta = (nome, label, opzioni, extra = {}) => ({ nome, label, tipo: 'scelta', opzioni, obbligatorio: true, ...extra })
+// File della staging Dropbox di una categoria (mesh, texture, collider).
+const file = (nome, label, categoria, extra = {}) => rel(nome, label, 'dropbox_file', { fisso: { categoria }, ...extra })
 
 const SLOT = [1, 2, 3, 4, 5, 6]
 
@@ -13,20 +15,47 @@ export const ARMI = ['Moschetto', 'Moschetto rigato', 'Sciabola', 'Lancia', 'Art
 const xyz = [testo('nome', 'Nome'), numero('valoreX', 'X'), numero('valoreY', 'Y'), numero('valoreZ', 'Z')]
 
 export const TABELLE = [
-  { id: 'esercito', titolo: 'Esercito', campi: [testo('nome', 'Nome'), testo('note', 'Note', false)] },
-  { id: 'reparto', titolo: 'Reparto', campi: [testo('nome', 'Nome'), testo('note', 'Note', false)] },
+  { id: 'esercito', titolo: 'Esercito', campi: [testo('nome', 'Nome'), testo('note', 'Note', false), testo('cartella', 'Cartella Dropbox', false)] },
+  { id: 'reparto', titolo: 'Reparto', campi: [testo('nome', 'Nome'), testo('note', 'Note', false), testo('cartella', 'Cartella Dropbox', false)] },
   { id: 'tipo_reparto', titolo: 'Tipo reparto', campi: [rel('id_reparto', 'Reparto', 'reparto'), testo('tipo', 'Tipo')] },
   { id: 'tipo_model', titolo: 'Tipo model', campi: [testo('nome', 'Nome')] },
-  { id: 'texture', titolo: 'Texture', filtri: ['id_esercito', 'id_reparto'], campi: [testo('nome', 'Nome'), rel('id_esercito', 'Esercito', 'esercito'), rel('id_reparto', 'Reparto', 'reparto'), testo('url', 'URL'), testo('note', 'Note', false)] },
-  { id: 'collider', titolo: 'Collider', campi: [testo('nome', 'Nome'), testo('url', 'URL'), testo('note', 'Note', false)] },
+  {
+    id: 'dropbox_file',
+    titolo: 'File Dropbox',
+    solaLettura: true,
+    elenco: ['nome', 'estensione', 'categoria', 'id_esercito', 'id_reparto', 'trovato', 'percorso'],
+    filtri: ['id_esercito', 'id_reparto'],
+    campi: [
+      testo('nome', 'Nome'),
+      testo('estensione', 'Estensione'),
+      testo('categoria', 'Categoria'),
+      rel('id_esercito', 'Esercito', 'esercito'),
+      rel('id_reparto', 'Reparto', 'reparto'),
+      { nome: 'trovato', label: 'Su Dropbox', tipo: 'bool' },
+      testo('percorso', 'Percorso'),
+    ],
+  },
+  {
+    id: 'texture',
+    titolo: 'Texture',
+    filtri: ['id_esercito', 'id_reparto'],
+    campi: [
+      testo('nome', 'Nome'),
+      rel('id_esercito', 'Esercito', 'esercito'),
+      rel('id_reparto', 'Reparto', 'reparto'),
+      file('id_file', 'File', 'texture', { dipendeDa: ['id_esercito', 'id_reparto'] }),
+      testo('note', 'Note', false),
+    ],
+  },
+  { id: 'collider', titolo: 'Collider', campi: [testo('nome', 'Nome'), file('id_file', 'File', 'collider'), testo('note', 'Note', false)] },
   {
     id: 'base',
     titolo: 'Base',
     campi: [
       testo('nome', 'Nome'),
-      testo('urlmesh', 'URL mesh'),
-      testo('diffuse', 'URL diffuse'),
-      testo('normal', 'URL normal', false),
+      file('id_mesh', 'Mesh', 'mesh'),
+      file('id_diffuse', 'Diffuse', 'texture'),
+      file('id_normal', 'Normal', 'texture', { obbligatorio: false }),
       rel('id_collider', 'Collider', 'collider', { obbligatorio: false }),
     ],
   },
@@ -44,7 +73,7 @@ export const TABELLE = [
       rel('id_reparto', 'Reparto', 'reparto'),
       rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }),
       rel('id_tipo_model', 'Tipo model', 'tipo_model'),
-      testo('urlmesh', 'URL mesh'),
+      file('id_mesh', 'Mesh', 'mesh', { dipendeDa: ['id_esercito', 'id_reparto'] }),
       rel('id_texture', 'Texture', 'texture', { obbligatorio: false, dipendeDa: ['id_esercito', 'id_reparto'] }),
       rel('id_collider', 'Collider', 'collider', { obbligatorio: false }),
     ],
@@ -147,6 +176,7 @@ export const TABELLE = [
 // Etichetta di un record nelle combo e negli elenchi.
 export function etichetta(record, dati = {}) {
   if (!record) return ''
+  if (record.id_dropbox) return `${record.nome}.${record.estensione}${record.trovato ? '' : ' (non trovato)'}`
   const trova = (tabella, id) => (dati[tabella] ?? []).find((r) => r.id === id)
   if (record.basi) return `${etichetta(trova('fpb', record.id_fpb), dati)} · ${record.basi} basi`
   if (record.figure) return `${etichetta(trova('reparto', record.id_reparto))} ${etichetta(trova('tipo_reparto', record.id_tipo_reparto))} · ${record.figure} figure`

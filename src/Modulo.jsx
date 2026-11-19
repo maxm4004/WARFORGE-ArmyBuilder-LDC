@@ -37,8 +37,9 @@ export default function Modulo({ tabella, record, dati, onSalva, onAnnulla, annu
             <select value={valori[c.nome]} required={c.obbligatorio} onChange={(e) => cambia(c.nome, e.target.value)}>
               <option value="">—</option>
               {(dati[c.tabella] ?? [])
-                .filter((r) => (c.dipendeDa ?? []).every((d) => r[d] === valori[d]))
+                .filter((r) => (c.dipendeDa ?? []).every((d) => valori[d] && r[d] === valori[d]))
                 .filter((r) => !c.filtraPer || filtraPer(c.filtraPer, r))
+                .filter((r) => Object.entries(c.fisso ?? {}).every(([k, v]) => r[k] === v))
                 .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
             </select>
           ) : c.tipo === 'scelta' ? (

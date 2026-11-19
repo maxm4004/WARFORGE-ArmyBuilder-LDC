@@ -85,6 +85,7 @@ export default function App() {
       const padre = (dati[campo.tabellaVia] ?? []).find((r) => r.id === record[campo.via])
       return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === padre?.[campo.campo]), dati)
     }
+    if (campo.tipo === 'bool') return record[campo.nome] ? 'sì' : 'non trovato'
     if (campo.tipo !== 'rel') return String(record[campo.nome] ?? '')
     return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === record[campo.nome]), dati)
   }
@@ -134,7 +135,7 @@ export default function App() {
             onAnnulla={() => { setModifica(null); setCopia(null) }}
           />
         ) : (
-          <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
+          !tabella.solaLettura && <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
         )}
         {sezione === 'censimento' && <div className="scorri">
           <table>
@@ -145,7 +146,7 @@ export default function App() {
               {righe.map((r) => (
                 <tr key={r.id} className={modifica?.id === r.id ? 'selezionata' : ''}>
                   <td className="azioni">
-                    <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>
+                    {!tabella.solaLettura && <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>}
                     {tabId === 'unita' && <button onClick={() => { setModifica(null); setCopia(r) }}>Copia</button>}
                     <button onClick={() => rimuovi(r)}>Elimina</button>
                   </td>
