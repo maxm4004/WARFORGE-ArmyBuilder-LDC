@@ -6,4 +6,4 @@ if "%~1"=="" (
 
 set PB_EMAIL=maxm4004@mymail.com
 set PB_PASSWORD=maxm4004
-node "%~dp0scripts\%~1.mjs" --apply
+node "%~dp0scripts\%~1.mjs" --apply %2 %3 %4

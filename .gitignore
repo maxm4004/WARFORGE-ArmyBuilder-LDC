@@ -5,3 +5,5 @@ pocketBase/pocketbase
 pocketBase/pocketbase.exe
 Warforge-ArmyBuilder.code-workspace
 pocketBase/pb_migrations/1793896464_updated_offset.js
+pocketBase/dropbox-token.txt
+pocketBase/dropbox-links.csv
