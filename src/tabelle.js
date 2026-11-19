@@ -25,7 +25,7 @@ export const TABELLE = [
     // I file li crea dropbox-import: a mano si correggono solo esercito, reparto e tipo reparto.
     soloModifica: ['id_esercito', 'id_reparto', 'id_tipo_reparto'],
     elenco: ['nome', 'estensione', 'categoria', 'id_esercito', 'id_reparto', 'id_tipo_reparto', 'trovato', 'percorso'],
-    filtri: ['estensione', 'id_esercito', 'id_reparto', 'id_tipo_reparto'],
+    filtri: ['estensione', 'categoria', 'id_esercito', 'id_reparto', 'id_tipo_reparto'],
     campi: [
       testo('nome', 'Nome'),
       testo('estensione', 'Estensione'),
