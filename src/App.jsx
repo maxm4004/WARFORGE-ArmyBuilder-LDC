@@ -86,7 +86,7 @@ export default function App() {
   return (
     <>
       <header>
-        <h1>ArmyBuilder-LDC</h1>
+        <h1>ArmyBuilder-LDC <span className="versione">v{__VERSIONE__}</span></h1>
         <nav className="sezioni">
           {[['censimento', 'Censimento'], ['coalizioni', 'Coalizioni']].map(([id, titolo]) => (
             <button key={id} className={id === sezione ? 'attivo' : ''} onClick={() => { setSezione(id); setAvviso('') }}>{titolo}</button>
