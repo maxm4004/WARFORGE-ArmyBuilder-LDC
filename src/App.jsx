@@ -3,6 +3,7 @@ import { aggiorna, contaUsi, crea, elimina, leggiTutti } from './api.js'
 import { TABELLE, etichetta, riferimentiA } from './tabelle.js'
 import UnitaEditor from './UnitaEditor.jsx'
 import Modulo from './Modulo.jsx'
+import RigaModifica from './RigaModifica.jsx'
 import CoalizioniPage from './CoalizioniPage.jsx'
 
 export default function App() {
@@ -140,18 +141,7 @@ export default function App() {
             onAnnulla={() => { setModifica(null); setCopia(null) }}
           />
         ) : (
-          tabella.soloModifica ? (
-            modifica && (
-              <Modulo
-                key={`${tabId}-${modifica.id}`}
-                tabella={{ ...tabella, campi: tabella.campi.filter((c) => tabella.soloModifica.includes(c.nome)) }}
-                record={modifica}
-                dati={dati}
-                onSalva={salva}
-                onAnnulla={() => setModifica(null)}
-              />
-            )
-          ) : (
+          !tabella.soloModifica && (
             <Modulo key={`${tabId}-${modifica?.id ?? 'nuovo'}`} tabella={tabella} record={modifica} dati={dati} onSalva={salva} onAnnulla={() => setModifica(null)} />
           )
         )}
@@ -161,7 +151,9 @@ export default function App() {
               <tr><th />{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
             </thead>
             <tbody>
-              {righe.map((r) => (
+              {righe.map((r) => tabella.soloModifica && modifica?.id === r.id ? (
+                <RigaModifica key={r.id} tabella={tabella} record={r} colonne={colonne} dati={dati} cella={cella} onSalva={salva} onAnnulla={() => setModifica(null)} />
+              ) : (
                 <tr key={r.id} className={modifica?.id === r.id ? 'selezionata' : ''}>
                   <td className="azioni">
                     <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>
