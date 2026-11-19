@@ -24,6 +24,7 @@ const COLLECTIONS = [
   { name: "tipo_model", fields: [testo("nome")] },
   { name: "texture", fields: [testo("url"), testo("nome"), testo("note", false), rel("id_esercito", "esercito"), rel("id_reparto", "reparto")] },
   { name: "collider", fields: [testo("url"), testo("nome"), testo("note", false)] },
+  { name: "base", fields: [testo("nome"), testo("urlmesh"), testo("diffuse"), testo("normal", false), rel("id_collider", "collider", false)] },
   { name: "offset", fields: [...xyz, rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto")] },
   { name: "scale", fields: xyz },
   { name: "rotation", fields: xyz },
@@ -42,7 +43,7 @@ const COLLECTIONS = [
   },
   {
     name: "fpb",
-    fields: [rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto"), intero("figure"), scelta("misura", ["4x3", "4x5"])],
+    fields: [rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto"), intero("figure"), scelta("misura", ["4x1.5", "4x3", "4x5"]), rel("id_base", "base")],
   },
   {
     name: "fpb_slot",

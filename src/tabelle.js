@@ -19,6 +19,17 @@ export const TABELLE = [
   { id: 'tipo_model', titolo: 'Tipo model', campi: [testo('nome', 'Nome')] },
   { id: 'texture', titolo: 'Texture', filtri: ['id_esercito', 'id_reparto'], campi: [testo('nome', 'Nome'), rel('id_esercito', 'Esercito', 'esercito'), rel('id_reparto', 'Reparto', 'reparto'), testo('url', 'URL'), testo('note', 'Note', false)] },
   { id: 'collider', titolo: 'Collider', campi: [testo('nome', 'Nome'), testo('url', 'URL'), testo('note', 'Note', false)] },
+  {
+    id: 'base',
+    titolo: 'Base',
+    campi: [
+      testo('nome', 'Nome'),
+      testo('urlmesh', 'URL mesh'),
+      testo('diffuse', 'URL diffuse'),
+      testo('normal', 'URL normal', false),
+      rel('id_collider', 'Collider', 'collider', { obbligatorio: false }),
+    ],
+  },
   { id: 'offset', titolo: 'Offset', filtri: ['id_reparto', 'id_tipo_reparto'], campi: [testo('nome', 'Nome'), rel('id_reparto', 'Reparto', 'reparto'), rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }), ...xyz.slice(1)] },
   { id: 'scale', titolo: 'Scale', campi: xyz },
   { id: 'rotation', titolo: 'Rotation', campi: xyz },
@@ -45,7 +56,8 @@ export const TABELLE = [
       rel('id_reparto', 'Reparto', 'reparto'),
       rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }),
       scelta('figure', 'Figure per base', SLOT, { numerico: true }),
-      scelta('misura', 'Misura base', ['4x3', '4x5']),
+      scelta('misura', 'Misura base', ['4x1.5', '4x3', '4x5']),
+      rel('id_base', 'Base', 'base'),
     ],
   },
   {
