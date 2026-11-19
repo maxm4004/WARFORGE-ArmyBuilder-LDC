@@ -48,12 +48,14 @@ export default function App() {
   async function salva(valori) {
     try {
       const salvato = modifica ? await aggiorna(tabId, modifica.id, valori) : await crea(tabId, valori)
+      // PocketBase ignora in silenzio i campi che non esistono nel database: va segnalato.
+      const mancanti = Object.keys(valori).filter((k) => !(k in salvato))
       setDati((d) => ({
         ...d,
         [tabId]: modifica ? d[tabId].map((r) => (r.id === salvato.id ? salvato : r)) : [...(d[tabId] ?? []), salvato],
       }))
       setModifica(null)
-      setAvviso('')
+      setAvviso(mancanti.length ? `Non salvato: il campo ${mancanti.join(', ')} non esiste nel database. Lancia lo script di aggiornamento.` : '')
     } catch (err) {
       setAvviso(err.message)
     }
@@ -112,9 +114,12 @@ export default function App() {
               <label key={c.nome}>Filtra per {c.label}
                 <select value={filtri[c.nome] ?? ''} onChange={(e) => cambiaFiltro(c.nome, e.target.value)}>
                   <option value="">Tutti</option>
-                  {(dati[c.tabella] ?? [])
-                    .filter((r) => (c.dipendeDa ?? []).every((d) => !filtri[d] || r[d] === filtri[d]))
-                    .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
+                  {c.tipo === 'rel'
+                    ? (dati[c.tabella] ?? [])
+                      .filter((r) => (c.dipendeDa ?? []).every((d) => !filtri[d] || r[d] === filtri[d]))
+                      .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)
+                    : [...new Set((dati[tabId] ?? []).map((r) => r[c.nome]).filter(Boolean))].sort()
+                      .map((v) => <option key={v} value={v}>{v}</option>)}
                 </select>
               </label>
             ))}
