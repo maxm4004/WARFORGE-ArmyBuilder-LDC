@@ -63,10 +63,15 @@ export const TABELLE = [
     id: 'fpb_slot',
     titolo: 'Slot FPB',
     filtri: ['id_fpb'],
+    // Reparto e tipo reparto non sono salvati sullo slot: si leggono dalla FPB.
+    derivati: [
+      { nome: 'reparto', label: 'Reparto', via: 'id_fpb', tabellaVia: 'fpb', campo: 'id_reparto', tabella: 'reparto' },
+      { nome: 'tipo_reparto', label: 'Tipo reparto', via: 'id_fpb', tabellaVia: 'fpb', campo: 'id_tipo_reparto', tabella: 'tipo_reparto' },
+    ],
     campi: [
       rel('id_fpb', 'FPB', 'fpb', { cascata: true }),
       scelta('numero_slot', 'Slot', SLOT, { numerico: true }),
-      rel('id_offset', 'Offset', 'offset'),
+      rel('id_offset', 'Offset', 'offset', { filtraPer: { via: 'id_fpb', tabella: 'fpb', campi: ['id_reparto', 'id_tipo_reparto'] } }),
       rel('id_scale', 'Scale', 'scale'),
       rel('id_rotation', 'Rotation', 'rotation'),
     ],

@@ -16,7 +16,9 @@ export default function App() {
   const tabella = TABELLE.find((t) => t.id === tabId)
   const campiFiltro = (tabella.filtri ?? []).map((nome) => tabella.campi.find((c) => c.nome === nome))
   const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || r[c.nome] === filtri[c.nome]))
-  const colonne = tabella.campi.filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
+  const colonne = tabella.campi
+    .filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
+    .flatMap((c) => [c, ...(tabella.derivati ?? []).filter((d) => d.via === c.nome)])
 
   function carica() {
     return Promise.all(TABELLE.map((t) => leggiTutti(t.id).then((r) => [t.id, r])))
@@ -79,6 +81,10 @@ export default function App() {
   }
 
   function cella(campo, record) {
+    if (campo.via) {
+      const padre = (dati[campo.tabellaVia] ?? []).find((r) => r.id === record[campo.via])
+      return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === padre?.[campo.campo]), dati)
+    }
     if (campo.tipo !== 'rel') return String(record[campo.nome] ?? '')
     return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === record[campo.nome]), dati)
   }

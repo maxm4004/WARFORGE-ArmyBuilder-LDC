@@ -12,9 +12,15 @@ export default function Modulo({ tabella, record, dati, onSalva, onAnnulla, annu
     setValori((v) => {
       const nuovi = { ...v, [campo]: valore }
       // Cambiando un campo, le scelte che dipendono da esso non sono piu' valide.
-      tabella.campi.filter((c) => c.dipendeDa?.includes(campo)).forEach((c) => { nuovi[c.nome] = '' })
+      tabella.campi.filter((c) => c.dipendeDa?.includes(campo) || c.filtraPer?.via === campo).forEach((c) => { nuovi[c.nome] = '' })
       return nuovi
     })
+  }
+
+  // Tiene solo i record con gli stessi campi del record scelto in un'altra combo (es. offset con reparto e tipo della FPB).
+  function filtraPer({ via, tabella: tabellaVia, campi }, r) {
+    const padre = (dati[tabellaVia] ?? []).find((x) => x.id === valori[via])
+    return Boolean(padre) && campi.every((k) => r[k] === padre[k])
   }
 
   function invia(e) {
@@ -32,6 +38,7 @@ export default function Modulo({ tabella, record, dati, onSalva, onAnnulla, annu
               <option value="">—</option>
               {(dati[c.tabella] ?? [])
                 .filter((r) => (c.dipendeDa ?? []).every((d) => r[d] === valori[d]))
+                .filter((r) => !c.filtraPer || filtraPer(c.filtraPer, r))
                 .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
             </select>
           ) : c.tipo === 'scelta' ? (
