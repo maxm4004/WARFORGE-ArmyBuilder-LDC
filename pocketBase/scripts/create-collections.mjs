@@ -43,7 +43,7 @@ const COLLECTIONS = [
   },
   {
     name: "fpb",
-    fields: [rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto"), intero("figure"), scelta("misura", ["4x1.5", "4x3", "4x5"]), rel("id_base", "base")],
+    fields: [rel("id_reparto", "reparto"), rel("id_tipo_reparto", "tipo_reparto"), intero("figure"), rel("id_base", "base")],
   },
   {
     name: "fpb_slot",
