@@ -16,6 +16,7 @@ export default function App() {
   const [avviso, setAvviso] = useState('')
   const [filtri, setFiltri] = useState({})
   const [ingrandita, setIngrandita] = useState(null)
+  const [selezionati, setSelezionati] = useState(new Set())
   const tabella = TABELLE.find((t) => t.id === tabId)
   const campiFiltro = (tabella.filtri ?? []).map((nome) => tabella.campi.find((c) => c.nome === nome))
   const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || r[c.nome] === filtri[c.nome]))
@@ -49,6 +50,7 @@ export default function App() {
     setModifica(null)
     setCopia(null)
     setFiltri({})
+    setSelezionati(new Set())
     setAvviso('')
   }
 
@@ -87,6 +89,45 @@ export default function App() {
     } catch (err) {
       setAvviso(err.message)
     }
+  }
+
+  // Selezione multipla: conta solo le righe visibili con i filtri attuali.
+  const selezionateVisibili = righe.filter((r) => selezionati.has(r.id))
+  const tutteSelezionate = righe.length > 0 && selezionateVisibili.length === righe.length
+
+  function seleziona(id, si) {
+    setSelezionati((s) => {
+      const nuovi = new Set(s)
+      if (si) nuovi.add(id)
+      else nuovi.delete(id)
+      return nuovi
+    })
+  }
+
+  // Elimina le righe selezionate; salta quelle ancora collegate ad altri record.
+  async function eliminaSelezionati() {
+    const inUso = (r) => riferimentiA(tabId).find((rif) => (dati[rif.tabella] ?? []).some((x) => x[rif.campo] === r.id))
+    const bloccate = selezionateVisibili.filter(inUso)
+    const daEliminare = selezionateVisibili.filter((r) => !inUso(r))
+    const nota = bloccate.length ? `\n${bloccate.length} ${bloccate.length === 1 ? 'resta perché ancora collegata' : 'restano perché ancora collegate'}.` : ''
+    if (daEliminare.length === 0) {
+      setAvviso(`Nessuna riga eliminabile: le ${bloccate.length} selezionate sono ancora collegate.`)
+      return
+    }
+    if (!window.confirm(`Eliminare ${daEliminare.length === 1 ? '1 riga' : `${daEliminare.length} righe`}?${nota}`)) return
+    const eliminate = []
+    try {
+      for (const r of daEliminare) {
+        await elimina(tabId, r.id)
+        eliminate.push(r.id)
+      }
+      setAvviso(bloccate.length ? `Eliminate ${eliminate.length}. Non eliminate perché collegate: ${bloccate.map((r) => etichetta(r, dati)).join(', ')}` : '')
+    } catch (err) {
+      setAvviso(`Eliminate ${eliminate.length}, poi errore: ${err.message}`)
+    }
+    setDati((d) => ({ ...d, [tabId]: d[tabId].filter((r) => !eliminate.includes(r.id)) }))
+    setSelezionati(new Set())
+    if (eliminate.includes(modifica?.id)) setModifica(null)
   }
 
   function cella(campo, record) {
@@ -137,6 +178,11 @@ export default function App() {
           </div>
         )}
         {avviso && <p className="avviso" role="alert">{avviso}</p>}
+        {sezione === 'censimento' && tabella.selezionabile && (
+          <div className="azioni">
+            <button disabled={selezionateVisibili.length === 0} onClick={eliminaSelezionati}>Elimina selezionati ({selezionateVisibili.length})</button>
+          </div>
+        )}
         {sezione === 'coalizioni' ? (
           <CoalizioniPage dati={dati} carica={carica} onAvviso={setAvviso} />
         ) : tabId === 'unita' ? (
@@ -158,13 +204,21 @@ export default function App() {
         {sezione === 'censimento' && <div className="scorri">
           <table>
             <thead>
-              <tr><th />{tabella.numerata && <th>#</th>}{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
+              <tr>
+                {tabella.selezionabile && (
+                  <th><input type="checkbox" aria-label="Seleziona tutte" checked={tutteSelezionate} onChange={(e) => setSelezionati(new Set(e.target.checked ? righe.map((r) => r.id) : []))} /></th>
+                )}
+                <th />{tabella.numerata && <th>#</th>}{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}
+              </tr>
             </thead>
             <tbody>
               {righe.map((r, i) => tabella.soloModifica && modifica?.id === r.id ? (
                 <RigaModifica key={r.id} numero={tabella.numerata ? i + 1 : null} tabella={tabella} record={r} colonne={colonne} dati={dati} cella={cella} onSalva={salva} onAnnulla={() => setModifica(null)} />
               ) : (
                 <tr key={r.id} className={modifica?.id === r.id ? 'selezionata' : ''}>
+                  {tabella.selezionabile && (
+                    <td><input type="checkbox" aria-label="Seleziona" checked={selezionati.has(r.id)} onChange={(e) => seleziona(r.id, e.target.checked)} /></td>
+                  )}
                   <td className="azioni">
                     <button onClick={() => { setCopia(null); setModifica(r) }}>Modifica</button>
                     {tabId === 'unita' && <button onClick={() => { setModifica(null); setCopia(r) }}>Copia</button>}

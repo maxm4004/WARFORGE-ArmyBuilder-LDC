@@ -17,6 +17,7 @@ export default function RigaModifica({ numero, tabella, record, colonne, dati, c
 
   return (
     <tr className="selezionata">
+      {tabella.selezionabile && <td />}
       <td className="azioni">
         <button onClick={() => onSalva(valori)}>Salva</button>
         <button onClick={onAnnulla}>Annulla</button>
