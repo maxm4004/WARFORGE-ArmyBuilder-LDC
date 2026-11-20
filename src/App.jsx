@@ -148,11 +148,11 @@ export default function App() {
         {sezione === 'censimento' && <div className="scorri">
           <table>
             <thead>
-              <tr><th />{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
+              <tr><th />{tabella.numerata && <th>#</th>}{colonne.map((c) => <th key={c.nome}>{c.label}</th>)}</tr>
             </thead>
             <tbody>
-              {righe.map((r) => tabella.soloModifica && modifica?.id === r.id ? (
-                <RigaModifica key={r.id} tabella={tabella} record={r} colonne={colonne} dati={dati} cella={cella} onSalva={salva} onAnnulla={() => setModifica(null)} />
+              {righe.map((r, i) => tabella.soloModifica && modifica?.id === r.id ? (
+                <RigaModifica key={r.id} numero={tabella.numerata ? i + 1 : null} tabella={tabella} record={r} colonne={colonne} dati={dati} cella={cella} onSalva={salva} onAnnulla={() => setModifica(null)} />
               ) : (
                 <tr key={r.id} className={modifica?.id === r.id ? 'selezionata' : ''}>
                   <td className="azioni">
@@ -160,6 +160,7 @@ export default function App() {
                     {tabId === 'unita' && <button onClick={() => { setModifica(null); setCopia(r) }}>Copia</button>}
                     <button onClick={() => rimuovi(r)}>Elimina</button>
                   </td>
+                  {tabella.numerata && <td className="numero">{i + 1}</td>}
                   {colonne.map((c) => <td key={c.nome}>{cella(c, r)}</td>)}
                 </tr>
               ))}

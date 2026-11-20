@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { etichetta } from './tabelle.js'
 
 // Riga della tabella in modifica: le colonne modificabili diventano combo direttamente nella riga.
-export default function RigaModifica({ tabella, record, colonne, dati, cella, onSalva, onAnnulla }) {
+export default function RigaModifica({ numero, tabella, record, colonne, dati, cella, onSalva, onAnnulla }) {
   const modificabili = tabella.campi.filter((c) => tabella.soloModifica.includes(c.nome))
   const [valori, setValori] = useState(() => Object.fromEntries(modificabili.map((c) => [c.nome, record[c.nome] ?? ''])))
 
@@ -21,6 +21,7 @@ export default function RigaModifica({ tabella, record, colonne, dati, cella, on
         <button onClick={() => onSalva(valori)}>Salva</button>
         <button onClick={onAnnulla}>Annulla</button>
       </td>
+      {numero !== null && <td className="numero">{numero}</td>}
       {colonne.map((c) => (
         <td key={c.nome}>
           {c.nome in valori ? (
