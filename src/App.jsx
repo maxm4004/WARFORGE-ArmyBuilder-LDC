@@ -4,6 +4,7 @@ import { TABELLE, etichetta, riferimentiA } from './tabelle.js'
 import UnitaEditor from './UnitaEditor.jsx'
 import Modulo from './Modulo.jsx'
 import RigaModifica from './RigaModifica.jsx'
+import { Ingrandita, Miniatura } from './Anteprima.jsx'
 import CoalizioniPage from './CoalizioniPage.jsx'
 
 export default function App() {
@@ -14,12 +15,17 @@ export default function App() {
   const [copia, setCopia] = useState(null)
   const [avviso, setAvviso] = useState('')
   const [filtri, setFiltri] = useState({})
+  const [ingrandita, setIngrandita] = useState(null)
   const tabella = TABELLE.find((t) => t.id === tabId)
   const campiFiltro = (tabella.filtri ?? []).map((nome) => tabella.campi.find((c) => c.nome === nome))
   const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || r[c.nome] === filtri[c.nome]))
   const colonne = tabella.campi
     .filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
-    .flatMap((c) => [c, ...(tabella.derivati ?? []).filter((d) => d.via === c.nome)])
+    .flatMap((c) => [
+      c,
+      ...(tabella.derivati ?? []).filter((d) => d.via === c.nome),
+      ...(tabella.anteprima === c.nome ? [{ nome: '_anteprima', label: 'Anteprima', anteprimaDi: c.nome }] : []),
+    ])
 
   function carica() {
     return Promise.all(TABELLE.map((t) => leggiTutti(t.id).then((r) => [t.id, r])))
@@ -84,6 +90,10 @@ export default function App() {
   }
 
   function cella(campo, record) {
+    if (campo.anteprimaDi) {
+      const file = (dati.dropbox_file ?? []).find((r) => r.id === record[campo.anteprimaDi])
+      return <Miniatura url={file?.url} onApri={setIngrandita} />
+    }
     if (campo.via) {
       const padre = (dati[campo.tabellaVia] ?? []).find((r) => r.id === record[campo.via])
       return etichetta((dati[campo.tabella] ?? []).find((r) => r.id === padre?.[campo.campo]), dati)
@@ -168,6 +178,7 @@ export default function App() {
           </table>
         </div>}
       </main>
+      {ingrandita && <Ingrandita src={ingrandita} onChiudi={() => setIngrandita(null)} />}
     </>
   )
 }

@@ -41,6 +41,7 @@ export const TABELLE = [
   {
     id: 'texture',
     titolo: 'Texture',
+    anteprima: 'id_file',
     filtri: ['id_esercito', 'id_reparto'],
     campi: [
       testo('nome', 'Nome'),
