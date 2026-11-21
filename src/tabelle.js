@@ -119,7 +119,8 @@ export const TABELLE = [
   {
     id: 'unita',
     titolo: 'Unità',
-    filtri: ['id_esercito'],
+    // Il reparto dell'unita' e' quello della FPB della sua BPU.
+    filtri: ['id_esercito', { nome: 'reparto', label: 'Reparto', tipo: 'rel', tabella: 'reparto', percorso: [['id_bpu', 'bpu'], ['id_fpb', 'fpb']], campo: 'id_reparto' }],
     campi: [testo('nome', 'Nome'), rel('id_esercito', 'Esercito', 'esercito'), rel('id_bpu', 'BPU', 'bpu')],
   },
   // Composizione dell'unita': si gestisce dall'editor Unità, non ha un tab proprio.

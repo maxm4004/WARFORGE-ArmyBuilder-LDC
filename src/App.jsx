@@ -18,8 +18,14 @@ export default function App() {
   const [ingrandita, setIngrandita] = useState(null)
   const [selezionati, setSelezionati] = useState(new Set())
   const tabella = TABELLE.find((t) => t.id === tabId)
-  const campiFiltro = (tabella.filtri ?? []).map((nome) => tabella.campi.find((c) => c.nome === nome))
-  const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || r[c.nome] === filtri[c.nome]))
+  // Un filtro e' il nome di un campo, oppure un campo letto risalendo i collegamenti (percorso).
+  const campiFiltro = (tabella.filtri ?? []).map((f) => (typeof f === 'string' ? tabella.campi.find((c) => c.nome === f) : f))
+  function valoreFiltro(r, c) {
+    let x = r
+    for (const [campo, tabellaVia] of c.percorso ?? []) x = (dati[tabellaVia] ?? []).find((y) => y.id === x?.[campo])
+    return x?.[c.campo ?? c.nome]
+  }
+  const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || valoreFiltro(r, c) === filtri[c.nome]))
   const colonne = tabella.campi
     .filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
     .flatMap((c) => [
