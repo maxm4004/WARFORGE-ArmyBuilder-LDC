@@ -5,7 +5,7 @@
 import { leggiTutti, login } from "./lib/pb.mjs";
 
 const TABELLE = [
-  "esercito", "reparto", "tipo_reparto", "dropbox_file", "texture", "collider", "base",
+  "esercito", "reparto", "tipo_reparto", "tipo_model", "dropbox_file", "texture", "collider", "base",
   "figura", "fpb", "fpb_slot", "bpu", "unita", "unita_base", "unita_slot",
 ];
 
@@ -31,9 +31,11 @@ async function main() {
     else if (!f.trovato) segnala(sezione, `${nome}: ${etichetta} ${f.nome}.${f.estensione} non e' piu' su Dropbox`);
   }
 
+  // Un asset bundle porta gia' la sua texture: la texture si controlla solo per i custom model.
+  const bundle = new Set(d.tipo_model.filter((t) => t.nome.toLowerCase().includes("bundle")).map((t) => t.id));
   for (const r of d.figura) {
     controllaFile("Figura", r.nome, r.id_mesh, "mesh");
-    if (!r.id_texture) segnala("Figura", `${r.nome}: manca la texture`);
+    if (!r.id_texture && !bundle.has(r.id_tipo_model)) segnala("Figura", `${r.nome}: manca la texture`);
   }
   for (const r of d.base) {
     controllaFile("Base", r.nome, r.id_mesh, "mesh");
