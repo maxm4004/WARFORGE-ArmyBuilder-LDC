@@ -96,7 +96,12 @@ export const TABELLE = [
   {
     id: 'fpb_slot',
     titolo: 'Slot FPB',
-    filtri: ['id_fpb'],
+    // Reparto e tipo si leggono dalla FPB; la combo FPB mostra solo quelle del reparto e tipo scelti.
+    filtri: [
+      { nome: 'id_reparto', label: 'Reparto', tipo: 'rel', tabella: 'reparto', percorso: [['id_fpb', 'fpb']] },
+      { nome: 'id_tipo_reparto', label: 'Tipo reparto', tipo: 'rel', tabella: 'tipo_reparto', percorso: [['id_fpb', 'fpb']], dipendeDa: ['id_reparto'] },
+      { nome: 'id_fpb', label: 'FPB', tipo: 'rel', tabella: 'fpb', dipendeDa: ['id_reparto', 'id_tipo_reparto'] },
+    ],
     // Reparto e tipo reparto non sono salvati sullo slot: si leggono dalla FPB.
     derivati: [
       { nome: 'reparto', label: 'Reparto', via: 'id_fpb', tabellaVia: 'fpb', campo: 'id_reparto', tabella: 'reparto' },
