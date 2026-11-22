@@ -71,6 +71,7 @@ export const TABELLE = [
   {
     id: 'figura',
     titolo: 'Figura',
+    ordine: ['id_esercito', 'id_reparto', 'id_tipo_reparto', 'nome'],
     elenco: ['nome', 'id_esercito', 'id_reparto', 'id_tipo_reparto'],
     filtri: ['id_esercito', 'id_reparto'],
     campi: [

@@ -25,9 +25,22 @@ export default function App() {
     for (const [campo, tabellaVia] of c.percorso ?? []) x = (dati[tabellaVia] ?? []).find((y) => y.id === x?.[campo])
     return x?.[c.campo ?? c.nome]
   }
+  // Ordine dell'elenco: i campi di tabella.ordine, altrimenti il nome se c'e' (i numeri in ordine numerico).
+  const campiOrdine = (tabella.ordine ?? (tabella.campi.some((c) => c.nome === 'nome') ? ['nome'] : []))
+    .map((nome) => tabella.campi.find((c) => c.nome === nome))
+  function testoOrdine(r, c) {
+    if (c.tipo !== 'rel') return String(r[c.nome] ?? '')
+    return etichetta((dati[c.tabella] ?? []).find((x) => x.id === r[c.nome]), dati)
+  }
+  function confronta(a, b) {
+    for (const c of campiOrdine) {
+      const d = testoOrdine(a, c).localeCompare(testoOrdine(b, c), 'it', { numeric: true, sensitivity: 'base' })
+      if (d !== 0) return d
+    }
+    return 0
+  }
   const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || valoreFiltro(r, c) === filtri[c.nome]))
-    // Dove c'e' la colonna Nome, l'elenco e' in ordine di nome (i numeri nel nome in ordine numerico).
-    .sort((a, b) => (tabella.campi.some((c) => c.nome === 'nome') ? (a.nome ?? '').localeCompare(b.nome ?? '', 'it', { numeric: true, sensitivity: 'base' }) : 0))
+    .sort(confronta)
   const colonne = tabella.campi
     .filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
     .flatMap((c) => [
