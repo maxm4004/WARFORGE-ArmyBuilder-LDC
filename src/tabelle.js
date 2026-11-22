@@ -58,10 +58,11 @@ export const TABELLE = [
     titolo: 'Base',
     campi: [
       testo('nome', 'Nome'),
-      file('id_mesh', 'Mesh', 'mesh'),
-      file('id_diffuse', 'Diffuse', 'texture'),
-      file('id_normal', 'Normal', 'texture', { obbligatorio: false }),
-      rel('id_collider', 'Collider', 'collider', { obbligatorio: false }),
+      // Solo i file che stanno in una cartella Basi su Dropbox.
+      file('id_mesh', 'Mesh', 'mesh', { cartella: 'Basi' }),
+      file('id_diffuse', 'Diffuse', 'texture', { cartella: 'Basi' }),
+      file('id_normal', 'Normal', 'texture', { obbligatorio: false, cartella: 'Basi' }),
+      rel('id_collider', 'Collider', 'collider', { obbligatorio: false, cartella: 'Basi', cartellaVia: 'id_file' }),
     ],
   },
   { id: 'offset', titolo: 'Offset', filtri: ['id_reparto', 'id_tipo_reparto'], campi: [testo('nome', 'Nome'), rel('id_reparto', 'Reparto', 'reparto'), rel('id_tipo_reparto', 'Tipo reparto', 'tipo_reparto', { dipendeDa: ['id_reparto'] }), ...xyz.slice(1)] },

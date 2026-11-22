@@ -17,6 +17,12 @@ export default function Modulo({ tabella, record, dati, onSalva, onAnnulla, annu
     })
   }
 
+  // Il file (o il file collegato, con cartellaVia) sta dentro una cartella con quel nome su Dropbox.
+  function inCartella(r, { cartella, cartellaVia }) {
+    const file = cartellaVia ? (dati.dropbox_file ?? []).find((f) => f.id === r[cartellaVia]) : r
+    return (file?.percorso ?? '').toLowerCase().split('/').includes(cartella.toLowerCase())
+  }
+
   // Tiene solo i record con gli stessi campi del record scelto in un'altra combo (es. offset con reparto e tipo della FPB).
   function filtraPer({ via, tabella: tabellaVia, campi }, r) {
     const padre = (dati[tabellaVia] ?? []).find((x) => x.id === valori[via])
@@ -40,6 +46,7 @@ export default function Modulo({ tabella, record, dati, onSalva, onAnnulla, annu
                 .filter((r) => (c.dipendeDa ?? []).every((d) => valori[d] && r[d] === valori[d]))
                 .filter((r) => !c.filtraPer || filtraPer(c.filtraPer, r))
                 .filter((r) => Object.entries(c.fisso ?? {}).every(([k, v]) => r[k] === v))
+                .filter((r) => !c.cartella || inCartella(r, c))
                 .map((r) => <option key={r.id} value={r.id}>{etichetta(r, dati)}</option>)}
             </select>
           ) : c.tipo === 'scelta' ? (
