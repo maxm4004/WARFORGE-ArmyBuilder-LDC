@@ -81,16 +81,20 @@ async function main() {
     });
   }
 
-  const usati = new Set([...d.figura.map((r) => r.id_mesh), ...d.base.flatMap((r) => [r.id_mesh, r.id_diffuse, r.id_normal]),
-    ...d.texture.map((r) => r.id_file), ...d.collider.map((r) => r.id_file)].filter(Boolean));
-  for (const f of d.dropbox_file) {
-    if (f.trovato && !usati.has(f.id) && f.categoria) segnala("File Dropbox (info)", `${f.percorso}: non collegato a niente`);
-  }
-
   const sezioni = Object.entries(problemi);
   for (const [sezione, righe] of sezioni) console.log(`\n${sezione} (${righe.length})\n  ${righe.join("\n  ")}`);
-  const errori = sezioni.filter(([s]) => !s.endsWith("(info)")).reduce((n, [, r]) => n + r.length, 0);
+  const errori = sezioni.reduce((n, [, r]) => n + r.length, 0);
   console.log(errori === 0 ? "\nTutto a posto." : `\nProblemi da sistemare: ${errori}.`);
+
+  // Sempre in fondo: i file Dropbox che nessuna Figura, Base, Texture o Collider usa.
+  const usati = new Set([...d.figura.map((r) => r.id_mesh), ...d.base.flatMap((r) => [r.id_mesh, r.id_diffuse, r.id_normal]),
+    ...d.texture.map((r) => r.id_file), ...d.collider.map((r) => r.id_file)].filter(Boolean));
+  const inutilizzati = d.dropbox_file
+    .filter((f) => !usati.has(f.id))
+    .sort((a, b) => a.percorso.localeCompare(b.percorso))
+    .map((f) => `${f.percorso}${f.trovato ? "" : "  (non trovato)"}${f.categoria ? "" : "  (senza categoria)"}`);
+  console.log(`\nFile Dropbox senza utilizzo: ${inutilizzati.length} di ${d.dropbox_file.length}`);
+  if (inutilizzati.length) console.log(`  ${inutilizzati.join("\n  ")}`);
 }
 
 main().catch((err) => { console.error(err.message); process.exit(1); });
