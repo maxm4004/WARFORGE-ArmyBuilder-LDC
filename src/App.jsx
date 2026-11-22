@@ -26,6 +26,8 @@ export default function App() {
     return x?.[c.campo ?? c.nome]
   }
   const righe = (dati[tabId] ?? []).filter((r) => campiFiltro.every((c) => !filtri[c.nome] || valoreFiltro(r, c) === filtri[c.nome]))
+    // Dove c'e' la colonna Nome, l'elenco e' in ordine di nome (i numeri nel nome in ordine numerico).
+    .sort((a, b) => (tabella.campi.some((c) => c.nome === 'nome') ? (a.nome ?? '').localeCompare(b.nome ?? '', 'it', { numeric: true, sensitivity: 'base' }) : 0))
   const colonne = tabella.campi
     .filter((c) => !tabella.elenco || tabella.elenco.includes(c.nome))
     .flatMap((c) => [
