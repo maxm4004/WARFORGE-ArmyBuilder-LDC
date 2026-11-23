@@ -6,6 +6,7 @@ import Modulo from './Modulo.jsx'
 import RigaModifica from './RigaModifica.jsx'
 import { Ingrandita, Miniatura } from './Anteprima.jsx'
 import CoalizioniPage from './CoalizioniPage.jsx'
+import IncollaSlot from './IncollaSlot.jsx'
 
 export default function App() {
   const [sezione, setSezione] = useState('censimento')
@@ -204,6 +205,7 @@ export default function App() {
             <button disabled={selezionateVisibili.length === 0} onClick={eliminaSelezionati}>Elimina selezionati ({selezionateVisibili.length})</button>
           </div>
         )}
+        {sezione === 'censimento' && tabId === 'fpb_slot' && <IncollaSlot dati={dati} carica={carica} onAvviso={setAvviso} />}
         {sezione === 'coalizioni' ? (
           <CoalizioniPage dati={dati} carica={carica} onAvviso={setAvviso} />
         ) : tabId === 'unita' ? (
